@@ -1,18 +1,32 @@
+/* DOM ELEMENTS */
 const sketch = document.querySelector('#sketch')
 const generateButton = document.querySelector('#generateButton')
 const clearButton = document.querySelector('#clearButton')
 const gridButton = document.querySelector('#gridButton')
 const eraseButton = document.querySelector('#eraseButton')
-
-let gridShown = false
-let eraseMode = false
 const squares = []
 
+/* STATE VARIABLES */
+let gridShown = false
+let eraseMode = false
+let doNotDrawKey = false
+
+/* KEYBOARD EVENT LISTENERS */
+document.addEventListener('keydown', e => {
+  if(e.code === 'ControlLeft') doNotDrawKey = true
+})
+
+document.addEventListener('keyup', e => {
+  if(e.code === 'ControlLeft') doNotDrawKey = false
+})
+
+/* BUTTON EVENT LISTENERS */
 generateButton.onclick = () => handleGenerateButton()
 clearButton.onclick = () => handleClearButton()
 gridButton.onclick = () => handleGridButton()
 eraseButton.onclick = () => handleEraseButton()
 
+/* FUNCTIONS */
 function generateSquares(num) {
   sketch.innerHTML = ''
 
@@ -63,6 +77,6 @@ function handleGridButton() {
 }
 
 function toggleDrawMode(square, isDraw) {
-  if(isDraw)square.addEventListener('mouseover', e =>e.target.classList.add('selected'))
-  else square.addEventListener('mouseover', e =>e.target.classList.remove('selected'))
+  if(isDraw)square.addEventListener('mouseover', e => !doNotDrawKey && e.target.classList.add('selected'))
+  else square.addEventListener('mouseover', e => !doNotDrawKey && e.target.classList.remove('selected'))
 }
