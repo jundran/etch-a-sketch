@@ -1,13 +1,14 @@
 body {
   margin: 0;
   background-color: #0b0b0b;
+  font-family: monospace;
 }
 
 * { box-sizing: border-box; }
 
 #container {
   margin: 0 auto;
-  width: calc(100vmin - 76px);
+  width: calc(100vmin - 114px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -28,14 +29,14 @@ button {
   background-color: goldenrod;
   color: #333;
   border: 1px solid #000;
-  font-family: monospace;
+  font-family: inherit;
   font-weight: 900;
 }
 
 #sketch {
   display: grid;
   /* Allow for increased toolbox height when button text wraps on smalls screens */
-  height: calc(100vmin - 76px);
+  height: calc(100vmin - 114px);
   border: 5px solid darkgoldenrod;
 }
 
@@ -46,4 +47,15 @@ button {
 
 .selected {
   background-color: yellowgreen;
+}
+
+.info {
+  padding: 8px;
+  color: #FFF;
+  text-align: center;
+  border: 5px solid darkgoldenrod;
+  border-top: none;
+  white-space: nowrap;
+  overflow: auto;
+  text-overflow: ellipsis;
 }
