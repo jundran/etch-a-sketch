@@ -8,7 +8,7 @@ body {
 
 #container {
   margin: 0 auto;
-  width: calc(100vmin - 114px);
+  width: calc(100vmin - 96px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -35,8 +35,7 @@ button {
 
 #sketch {
   display: grid;
-  /* Allow for increased toolbox height when button text wraps on smalls screens */
-  height: calc(100vmin - 114px);
+  height: calc(100vmin - 96px);
   border: 5px solid darkgoldenrod;
 }
 
@@ -58,4 +57,16 @@ button {
   white-space: nowrap;
   overflow: auto;
   text-overflow: ellipsis;
+}
+
+/* Allow for increased toolbox height when button text wraps on smalls screens */
+/* Ideally do this when toolbox buttons are wrapping their text */
+@media (max-height: 800px) {
+  #container {
+    width: calc(100vmin - 114px);
+  }
+
+  #sketch {
+    height: calc(100vmin - 114px);
+  }
 }

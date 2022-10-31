@@ -1,6 +1,7 @@
 /* DOM ELEMENTS */
 const sketch = document.querySelector('#sketch')
 const generateButton = document.querySelector('#generateButton')
+const colourButton = document.querySelector('#colourButton')
 const clearButton = document.querySelector('#clearButton')
 const gridButton = document.querySelector('#gridButton')
 const eraseButton = document.querySelector('#eraseButton')
@@ -8,7 +9,7 @@ const squares = []
 
 /* STATE VARIABLES */
 let gridShown = false
-let eraseMode = false
+let drawMode = true
 let doNotDrawKey = false
 
 /* KEYBOARD EVENT LISTENERS */
@@ -25,6 +26,7 @@ generateButton.onclick = () => handleGenerateButton()
 clearButton.onclick = () => handleClearButton()
 gridButton.onclick = () => handleGridButton()
 eraseButton.onclick = () => handleEraseButton()
+colourButton.onclick = () => handleColourButton()
 
 /* FUNCTIONS */
 function generateSquares(num) {
@@ -45,12 +47,19 @@ function generateSquares(num) {
 
 function handleClearButton() {
   document.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'))
+  if(!drawMode) {
+    setDrawMode(true)
+    squares.forEach(square => toggleDrawMode(square))
+  }
+}
+
+function handleColourButton() {
+
 }
 
 function handleEraseButton() {
-  eraseMode = !eraseMode
-  squares.forEach(square => toggleDrawMode(square, !eraseMode))
-  eraseButton.textContent = eraseMode ? "Draw Mode" : "Erase Mode"
+  setDrawMode() // don't pass arg to toggle
+  squares.forEach(square => toggleDrawMode(square))
 }
 
 function handleGenerateButton() {
@@ -58,6 +67,8 @@ function handleGenerateButton() {
   ns = parseInt(ns)
   if(isNaN(ns) ) return
   if(ns > 100) ns = 100
+
+  setDrawMode(true)
 
   generateSquares(
     ns,
@@ -76,7 +87,16 @@ function handleGridButton() {
   gridButton.textContent = gridShown ? 'Hide grid' : 'Show grid'
 }
 
-function toggleDrawMode(square, isDraw) {
-  if(isDraw)square.addEventListener('mouseover', e => !doNotDrawKey && e.target.classList.add('selected'))
-  else square.addEventListener('mouseover', e => !doNotDrawKey && e.target.classList.remove('selected'))
+function setDrawMode(mode = !drawMode) {
+  drawMode = mode
+  eraseButton.textContent = drawMode ? "Erase Mode" : "Draw Mode"
+}
+
+function toggleDrawMode(square) {
+  if(drawMode)square.addEventListener('mouseover', e =>
+    !doNotDrawKey && e.target.classList.add('selected')
+  )
+  else square.addEventListener('mouseover', e =>
+    !doNotDrawKey && e.target.classList.remove('selected')
+  )
 }
