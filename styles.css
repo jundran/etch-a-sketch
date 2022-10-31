@@ -3,22 +3,22 @@ body {
   background-color: #0b0b0b;
 }
 
-body > * {
-  box-sizing: border-box;
-}
-
-.container {
+#container {
   margin: 0 auto;
-  width: calc(100vmin - 58px);
+  /* width: calc(100vmin - 58px); */
+  width: calc(100vmin - 76px);
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.toolbox {
+#toolbox {
+  display: flex;
+  justify-content: space-between;
   border: 5px solid darkgoldenrod;
   border-bottom: none;
   background-color: #222;
+  overflow: auto;
 }
 
 button {
@@ -31,15 +31,16 @@ button {
   font-weight: 900;
 }
 
-.sketch {
+#sketch {
   display: grid;
-  height: calc(100vmin - 68px);
+  /* height: calc(100vmin - 68px); */
+  height: calc(100vmin - 86px);
   border: 5px solid darkgoldenrod;
 }
 
 .square {
-  /* border: .25px solid #FFF; */
   background-color: #000;
+  border: .25px solid #FFF;
 }
 
 .selected {
