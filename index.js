@@ -11,6 +11,7 @@ const squares = []
 let gridShown = false
 let drawMode = true
 let doNotDrawKey = false
+let colourMode = true
 
 /* KEYBOARD EVENT LISTENERS */
 document.addEventListener('keydown', e => {
@@ -45,8 +46,37 @@ function generateSquares(num) {
   gridButton.textContent = 'Hide grid'
 }
 
+function getColour(existingColour) {
+  if(existingColour) {
+    const RGB_TEN_PERCENT = Math.ceil(256 / 10)
+    const x = existingColour.split(/(rgb\()|[,)]/g)
+
+    // Darken by 10%
+    const reduced = [x[2],x[4],x[6]].map(colour => {
+      let c = Math.floor(colour - RGB_TEN_PERCENT)
+      return c < 0 ? 0 : c
+    })
+
+    // If all colour has been stripped then return null else darkened colour
+    if(reduced.filter(colour => colour === 0).length === 3) return null
+    else return `rgb(${reduced})`
+  }
+  else {
+    const newColour = []
+    for (let i = 0; i < 3; i++) {
+      newColour.push(Math.floor(Math.random()* 255))
+    }
+    const [r,g,b] = [...newColour]
+    return  `rgb(${r}, ${g}, ${b})`
+  }
+}
+
 function handleClearButton() {
-  document.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'))
+  document.querySelectorAll('.selected').forEach(s => {
+    s.classList.remove('selected', 'coloured')
+    s.style.backgroundColor = 'black'
+  })
+
   if(!drawMode) {
     setDrawMode(true)
     squares.forEach(square => toggleDrawMode(square))
@@ -54,7 +84,8 @@ function handleClearButton() {
 }
 
 function handleColourButton() {
-
+  colourMode = !colourMode
+  colourButton.textContent = colourMode ? 'Plain mode' : 'Colour Mode'
 }
 
 function handleEraseButton() {
@@ -92,11 +123,34 @@ function setDrawMode(mode = !drawMode) {
   eraseButton.textContent = drawMode ? "Erase Mode" : "Draw Mode"
 }
 
+function colourSquare(e) {
+  if([...e.target.classList].includes('coloured')) {
+    const newColour = getColour(e.target.style.backgroundColor)
+    if(newColour) {
+      e.target.style.backgroundColor = newColour
+    } 
+    else {
+      e.target.style.backgroundColor = "black"
+      e.target.classList.remove('coloured')
+      e.target.classList.remove('selected')
+    }
+  } else {
+    e.target.classList.add('coloured')
+    e.target.style.backgroundColor = getColour()
+  }
+}
+
 function toggleDrawMode(square) {
-  if(drawMode)square.addEventListener('mouseover', e =>
-    !doNotDrawKey && e.target.classList.add('selected')
-  )
-  else square.addEventListener('mouseover', e =>
-    !doNotDrawKey && e.target.classList.remove('selected')
-  )
+  if(drawMode)square.addEventListener('mouseover', e => {
+    if(!doNotDrawKey) {
+      e.target.classList.add('selected')
+      if(colourMode) colourSquare(e)
+    }
+  })
+  else square.addEventListener('mouseover', e => {
+    if(!doNotDrawKey) {
+      e.target.classList.remove('selected', 'coloured')
+      e.target.style.backgroundColor = 'black'
+    }
+  })
 }
