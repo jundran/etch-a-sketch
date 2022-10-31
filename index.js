@@ -5,22 +5,22 @@ const gridButton = document.querySelector('#gridButton')
 const eraseButton = document.querySelector('#eraseButton')
 
 let gridShown = false
+let eraseMode = false
+const squares = []
 
-generateButton.onclick = () => handleGenerateSquares()
-clearButton.onclick = () => clearCanvas()
+generateButton.onclick = () => handleGenerateButton()
+clearButton.onclick = () => handleClearButton()
 gridButton.onclick = () => handleGridButton()
 eraseButton.onclick = () => handleEraseButton()
 
 function generateSquares(num) {
-  sketch.innerHTML = ""
+  sketch.innerHTML = ''
 
   for (let i = 0; i < num**2; i++) {
     const square = document.createElement('div')
-    square.classList.add("square")
-    
-    square.addEventListener('mouseover', e =>
-      e.target.classList.add('selected')
-    )
+    square.classList.add('square')
+    toggleDrawMode(square, true)
+    squares.push(square)
     sketch.appendChild(square)
   }
 
@@ -29,12 +29,21 @@ function generateSquares(num) {
   gridButton.textContent = 'Hide grid'
 }
 
-function handleGenerateSquares() {
-  let ns = prompt("Enter number of squares per row / column (max 100)")
+function handleClearButton() {
+  document.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'))
+}
+
+function handleEraseButton() {
+  eraseMode = !eraseMode
+  squares.forEach(square => toggleDrawMode(square, !eraseMode))
+  eraseButton.textContent = eraseMode ? "Draw Mode" : "Erase Mode"
+}
+
+function handleGenerateButton() {
+  let ns = prompt('Enter number of squares per axis (max 100)')
   ns = parseInt(ns)
   if(isNaN(ns) ) return
   if(ns > 100) ns = 100
-  console.log(typeof ns, ns)
 
   generateSquares(
     ns,
@@ -43,20 +52,17 @@ function handleGenerateSquares() {
   )
 }
 
-function clearCanvas() {
-  document.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'))
-}
-
 function handleGridButton() {
   if(gridShown) {
-    document.querySelectorAll('.square').forEach(s => s.style.border = `none`)
+    squares.forEach(s => s.style.border = `none`)
   } else {
-    document.querySelectorAll('.square').forEach(s => s.style.border = `.25px solid #FFF`)
+    squares.forEach(s => s.style.border = `.25px solid #FFF`)
   }
   gridShown = !gridShown
   gridButton.textContent = gridShown ? 'Hide grid' : 'Show grid'
 }
 
-function handleEraseButton() {
-
+function toggleDrawMode(square, isDraw) {
+  if(isDraw)square.addEventListener('mouseover', e =>e.target.classList.add('selected'))
+  else square.addEventListener('mouseover', e =>e.target.classList.remove('selected'))
 }
