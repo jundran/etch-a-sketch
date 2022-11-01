@@ -147,16 +147,26 @@ function clearColourAttributes(target) {
   target.style.backgroundColor = null
 }
 
+const drawEventCallback = e => {
+  if (doNotDrawKey) return
+  if (colourMode) colourSquare(e)
+  else applyPlainColour(e)
+}
+
+const eraseEventCallback = e => {
+  if (doNotDrawKey) return
+  clearColourAttributes(e.target)
+}
+
 function setDrawModeListeners(square) {
   // Draw mode
-  if(drawMode) square.addEventListener('mouseover', e => {
-    if(doNotDrawKey) return
-    if(colourMode) colourSquare(e)
-    else applyPlainColour(e)
-  })
+  if(drawMode) {
+    square.removeEventListener('mouseover', eraseEventCallback)
+    square.addEventListener('mouseover', drawEventCallback)
+  }
   // Erase mode
-  else square.addEventListener('mouseover', e => {
-    if(doNotDrawKey) return
-    clearColourAttributes(e.target)
-  })
+  else {
+    square.removeEventListener('mouseover', drawEventCallback)
+    square.addEventListener('mouseover', eraseEventCallback)
+  }
 }
