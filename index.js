@@ -33,8 +33,7 @@ eraseButton.onclick = () => handleEraseButton()
 function handleClearButton() {
   // Note different argument syntax for querySelectorAll and classList remove
   document.querySelectorAll('.plain, .coloured').forEach(s => {
-    s.classList.remove('plain', 'coloured')
-    s.style.backgroundColor = null
+    clearColourAttributes(s)
   })
   // Ensure sketch is in draw mode after clearing grid
   setDrawMode(true)
@@ -124,27 +123,28 @@ function colourSquare(e) {
   if([...e.target.classList].includes('coloured')) {
     const modifiedColour = getRGBColourString(e, false)
     e.target.style.backgroundColor = modifiedColour
-    if(!modifiedColour) {
-      e.target.classList.remove('coloured')
-      e.target.setAttribute('data-originalColour', null)
-    }
+    if(!modifiedColour) clearColourAttributes(e.target)
   }
   // Get new colour
   else {
     // ".coloured" is just an empty class to mark the square as
     // coloured but the actualy colour is set by getRGBColourString()
+    e.target.classList.remove('plain') // may or may not be set
     e.target.classList.add('coloured')
-    e.target.classList.remove('plain')
     e.target.style.backgroundColor = getRGBColourString(e, true)
   }
 }
 
 function applyPlainColour(e) {
   // Must clear any existing background colour to make adding plain class take effect
-  e.target.style.backgroundColor = null
+  clearColourAttributes(e.target)
   e.target.classList.add('plain')
-  e.target.classList.remove('coloured')
-  e.target.setAttribute('data-originalColour', null)
+}
+
+function clearColourAttributes(target) {
+  target.classList.remove('plain', 'coloured')
+  target.setAttribute('data-originalColour', null)
+  target.style.backgroundColor = null
 }
 
 function setDrawModeListeners(square) {
@@ -157,7 +157,6 @@ function setDrawModeListeners(square) {
   // Erase mode
   else square.addEventListener('mouseover', e => {
     if(doNotDrawKey) return
-    e.target.classList.remove('plain', 'coloured')
-    e.target.style.backgroundColor = null
+    clearColourAttributes(e.target)
   })
 }
