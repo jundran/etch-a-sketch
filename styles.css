@@ -24,7 +24,8 @@ body {
 }
 
 button {
-  padding: 8px 32px;
+  width: 20%;
+  padding: 8px;
   margin: 8px;
   background-color: goldenrod;
   color: #333;
@@ -58,15 +59,4 @@ button {
   white-space: nowrap;
   overflow: auto;
   text-overflow: ellipsis;
-}
-
-/* Allow for increased toolbox height when button text wraps on smalls screens */
-@media (max-height: 900px) {
-  #container {
-    width: calc(100vmin - 114px);
-  }
-
-  #sketch {
-    height: calc(100vmin - 114px);
-  }
 }

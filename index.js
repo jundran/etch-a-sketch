@@ -24,16 +24,43 @@ document.addEventListener('keyup', e => {
 
 /* BUTTON EVENT LISTENERS */
 generateButton.onclick = () => handleGenerateButton()
+colourButton.onclick = () => handleColourButton()
 clearButton.onclick = () => handleClearButton()
 gridButton.onclick = () => handleGridButton()
 eraseButton.onclick = () => handleEraseButton()
-colourButton.onclick = () => handleColourButton()
 
 /* FUNCTIONS */
-function generateSquares(num) {
-  sketch.innerHTML = ''
+function handleClearButton() {
+  // Note different argument syntax for querySelectorAll and classList remove
+  document.querySelectorAll('.plain, .coloured').forEach(s => {
+    s.classList.remove('plain', 'coloured')
+    s.style.backgroundColor = null
+  })
+  // Ensure sketch is in draw mode after clearing grid
+  setDrawMode(true)
+}
 
-  for (let i = 0; i < num**2; i++) {
+function handleColourButton() {
+  colourMode = !colourMode
+  colourButton.textContent = colourMode ? 'Plain mode' : 'Colour Mode'
+}
+
+function handleEraseButton() {
+  setDrawMode() // don't pass arg to toggle
+}
+
+function handleGenerateButton() {
+  const userInput = prompt('Enter number of squares per axis (max 100)')
+  let parsedNumber = parseInt(userInput)
+  if(isNaN(parsedNumber) ) return
+  if(parsedNumber > 100) parsedNumber = 100
+
+  sketch.innerHTML = ''
+  setDrawMode(true)
+  sketch.style.gridTemplateRows = `repeat(${parsedNumber}, 1fr)`,
+  sketch.style.gridTemplateColumns = `repeat(${parsedNumber}, 1fr)`
+
+  for (let i = 0; i < parsedNumber ** 2; i++) {
     const square = document.createElement('div')
     square.classList.add('square')
     setDrawModeListeners(square)
@@ -46,73 +73,10 @@ function generateSquares(num) {
   gridButton.textContent = 'Hide grid'
 }
 
-function getColour(existingColour) {
-  if(existingColour) {
-    const x = existingColour.split(/(rgb\()|[,)]/g)
-
-    // Darken by 10%
-    const reduced = [x[2],x[4],x[6]].map(colour => {
-      // TODO: need to somehow remember the original colour so that I can blacken
-      // the colour by 10% of the original so it takes 10 passes to remove all the colour
-      let c = Math.floor(colour - 25)
-      return c < 0 ? 0 : c
-    })
-
-    // If all colour has been stripped then return null else darkened colour
-    if(reduced.filter(colour => colour === 0).length === 3) return null
-    else return `rgb(${reduced})`
-  }
-  else {
-    const newColour = []
-    for (let i = 0; i < 3; i++) {
-      newColour.push(Math.floor(Math.random()* 255))
-    }
-    const [r,g,b] = [...newColour]
-    return  `rgb(${r}, ${g}, ${b})`
-  }
-}
-
-function handleClearButton() {
-  // Note different argument syntax for querySelectorAll and classList remove
-  document.querySelectorAll('.plain, .coloured').forEach(s => {
-    s.classList.remove('plain', 'coloured')
-    s.style.backgroundColor = null
-  })
-
-  if(!drawMode) setDrawMode(true)
-}
-
-function handleColourButton() {
-  colourMode = !colourMode
-  colourButton.textContent = colourMode ? 'Plain mode' : 'Colour Mode'
-  squares.forEach(square => setDrawModeListeners(square))
-}
-
-function handleEraseButton() {
-  setDrawMode() // don't pass arg to toggle
-}
-
-function handleGenerateButton() {
-  let ns = prompt('Enter number of squares per axis (max 100)')
-  ns = parseInt(ns)
-  if(isNaN(ns) ) return
-  if(ns > 100) ns = 100
-
-  setDrawMode(true)
-
-  generateSquares(
-    ns,
-    sketch.style.gridTemplateRows = `repeat(${ns}, 1fr)`,
-    sketch.style.gridTemplateColumns = `repeat(${ns}, 1fr)`
-  )
-}
-
 function handleGridButton() {
-  if(gridShown) {
-    squares.forEach(s => s.style.border = `none`)
-  } else {
-    squares.forEach(s => s.style.border = `.25px solid #FFF`)
-  }
+  if(gridShown) squares.forEach(s => s.style.border = `none`)
+  else squares.forEach(s => s.style.border = `.25px solid #FFF`)
+
   gridShown = !gridShown
   gridButton.textContent = gridShown ? 'Hide grid' : 'Show grid'
 }
@@ -124,33 +88,69 @@ function setDrawMode(mode = !drawMode) {
   if(currentDrawMode !== drawMode) squares.forEach(square => setDrawModeListeners(square))
 }
 
+function getRGBColourString(e, getNewColour) {
+  if(getNewColour) {
+    const newColour = []
+    for (let i = 0; i < 3; i++) {
+      newColour.push(Math.floor(Math.random() * 256)) // 0 - 255
+    }
+    e.target.setAttribute('data-originalColour', newColour)
+    const [r,g,b] = [...newColour]
+    return `rgb(${r}, ${g}, ${b})`
+  }
+  else {
+    // If square already has a colour then return this colour but 10% darker
+    const original = e.target.getAttribute('data-originalColour').split(',')
+    const current = e.target.style.backgroundColor.split(/(rgb\()|[,)]/g).filter(e => e && e.match(/[\d]/g))
+    const tenPercent = original.map(value => Math.ceil(value * .1))
+    const reduced = current.map((value, i) => {
+      const reducedValue = value - tenPercent[i]
+      return reducedValue < 0 ? 0 : reducedValue
+    })
+
+    // If all colour has been stripped then return null else darkened colour
+    if(reduced.filter(colour => colour === 0).length === 3) {
+      return null
+    }
+    else {
+      const [r,b,g] = [...reduced]
+      return `rgb(${r}, ${b}, ${g})`
+    }
+  }
+}
+
 function colourSquare(e) {
   // Modify current colour
   if([...e.target.classList].includes('coloured')) {
-    const modifiedColour = getColour(e.target.style.backgroundColor)
-    if(!modifiedColour) e.target.classList.remove('coloured')
-    else e.target.style.backgroundColor = modifiedColour
+    const modifiedColour = getRGBColourString(e, false)
+    e.target.style.backgroundColor = modifiedColour
+    if(!modifiedColour) {
+      e.target.classList.remove('coloured')
+      e.target.setAttribute('data-originalColour', null)
+    }
   }
   // Get new colour
   else {
+    // ".coloured" is just an empty class to mark the square as
+    // coloured but the actualy colour is set by getRGBColourString()
     e.target.classList.add('coloured')
     e.target.classList.remove('plain')
-    e.target.style.backgroundColor = getColour()
+    e.target.style.backgroundColor = getRGBColourString(e, true)
   }
 }
 
 function applyPlainColour(e) {
-  e.target.classList.remove('coloured')
-  // Must clear possible coloured bgColor to make adding plain class take effect
+  // Must clear any existing background colour to make adding plain class take effect
   e.target.style.backgroundColor = null
   e.target.classList.add('plain')
+  e.target.classList.remove('coloured')
+  e.target.setAttribute('data-originalColour', null)
 }
 
 function setDrawModeListeners(square) {
   // Draw mode
   if(drawMode) square.addEventListener('mouseover', e => {
     if(doNotDrawKey) return
-
     if(colourMode) colourSquare(e)
     else applyPlainColour(e)
   })
