@@ -29,7 +29,7 @@ clearButton.onclick = () => handleClearButton()
 gridButton.onclick = () => handleGridButton()
 eraseButton.onclick = () => handleEraseButton()
 
-/* FUNCTIONS */
+/* BUTTON HANDLER FUNCTIONS */
 function handleClearButton() {
   // Note different argument syntax for querySelectorAll and classList remove
   document.querySelectorAll('.plain, .coloured').forEach(s => {
@@ -80,6 +80,7 @@ function handleGridButton() {
   gridButton.textContent = gridShown ? 'Hide grid' : 'Show grid'
 }
 
+/* FUNCTIONS */
 function setDrawMode(mode = !drawMode) {
   const currentDrawMode = drawMode
   drawMode = mode
@@ -147,6 +148,7 @@ function clearColourAttributes(target) {
   target.style.backgroundColor = null
 }
 
+/* MOUSE OVER EVENT LISTENERS */
 const drawEventCallback = e => {
   if (doNotDrawKey) return
   if (colourMode) colourSquare(e)
