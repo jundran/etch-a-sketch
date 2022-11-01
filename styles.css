@@ -45,7 +45,7 @@ button {
   border: .25px solid #FFF;
 }
 
-.selected {
+.plain {
   background-color: yellowgreen;
 }
 

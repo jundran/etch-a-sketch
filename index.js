@@ -36,7 +36,7 @@ function generateSquares(num) {
   for (let i = 0; i < num**2; i++) {
     const square = document.createElement('div')
     square.classList.add('square')
-    toggleDrawMode(square, true)
+    setDrawModeListeners(square)
     squares.push(square)
     sketch.appendChild(square)
   }
@@ -48,12 +48,13 @@ function generateSquares(num) {
 
 function getColour(existingColour) {
   if(existingColour) {
-    const RGB_TEN_PERCENT = Math.ceil(256 / 10)
     const x = existingColour.split(/(rgb\()|[,)]/g)
 
     // Darken by 10%
     const reduced = [x[2],x[4],x[6]].map(colour => {
-      let c = Math.floor(colour - RGB_TEN_PERCENT)
+      // TODO: need to somehow remember the original colour so that I can blacken
+      // the colour by 10% of the original so it takes 10 passes to remove all the colour
+      let c = Math.floor(colour - 25)
       return c < 0 ? 0 : c
     })
 
@@ -72,25 +73,23 @@ function getColour(existingColour) {
 }
 
 function handleClearButton() {
-  document.querySelectorAll('.selected').forEach(s => {
-    s.classList.remove('selected', 'coloured')
-    s.style.backgroundColor = 'black'
+  // Note different argument syntax for querySelectorAll and classList remove
+  document.querySelectorAll('.plain, .coloured').forEach(s => {
+    s.classList.remove('plain', 'coloured')
+    s.style.backgroundColor = null
   })
 
-  if(!drawMode) {
-    setDrawMode(true)
-    squares.forEach(square => toggleDrawMode(square))
-  }
+  if(!drawMode) setDrawMode(true)
 }
 
 function handleColourButton() {
   colourMode = !colourMode
   colourButton.textContent = colourMode ? 'Plain mode' : 'Colour Mode'
+  squares.forEach(square => setDrawModeListeners(square))
 }
 
 function handleEraseButton() {
   setDrawMode() // don't pass arg to toggle
-  squares.forEach(square => toggleDrawMode(square))
 }
 
 function handleGenerateButton() {
@@ -119,38 +118,46 @@ function handleGridButton() {
 }
 
 function setDrawMode(mode = !drawMode) {
+  const currentDrawMode = drawMode
   drawMode = mode
   eraseButton.textContent = drawMode ? "Erase Mode" : "Draw Mode"
+  if(currentDrawMode !== drawMode) squares.forEach(square => setDrawModeListeners(square))
 }
 
 function colourSquare(e) {
+  // Modify current colour
   if([...e.target.classList].includes('coloured')) {
-    const newColour = getColour(e.target.style.backgroundColor)
-    if(newColour) {
-      e.target.style.backgroundColor = newColour
-    } 
-    else {
-      e.target.style.backgroundColor = "black"
-      e.target.classList.remove('coloured')
-      e.target.classList.remove('selected')
-    }
-  } else {
+    const modifiedColour = getColour(e.target.style.backgroundColor)
+    if(!modifiedColour) e.target.classList.remove('coloured')
+    else e.target.style.backgroundColor = modifiedColour
+  }
+  // Get new colour
+  else {
     e.target.classList.add('coloured')
+    e.target.classList.remove('plain')
     e.target.style.backgroundColor = getColour()
   }
 }
 
-function toggleDrawMode(square) {
-  if(drawMode)square.addEventListener('mouseover', e => {
-    if(!doNotDrawKey) {
-      e.target.classList.add('selected')
-      if(colourMode) colourSquare(e)
-    }
+function applyPlainColour(e) {
+  e.target.classList.remove('coloured')
+  // Must clear possible coloured bgColor to make adding plain class take effect
+  e.target.style.backgroundColor = null
+  e.target.classList.add('plain')
+}
+
+function setDrawModeListeners(square) {
+  // Draw mode
+  if(drawMode) square.addEventListener('mouseover', e => {
+    if(doNotDrawKey) return
+
+    if(colourMode) colourSquare(e)
+    else applyPlainColour(e)
   })
+  // Erase mode
   else square.addEventListener('mouseover', e => {
-    if(!doNotDrawKey) {
-      e.target.classList.remove('selected', 'coloured')
-      e.target.style.backgroundColor = 'black'
-    }
+    if(doNotDrawKey) return
+    e.target.classList.remove('plain', 'coloured')
+    e.target.style.backgroundColor = null
   })
 }
