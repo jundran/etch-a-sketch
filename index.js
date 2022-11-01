@@ -159,12 +159,10 @@ const eraseEventCallback = e => {
 }
 
 function setDrawModeListeners(square) {
-  // Draw mode
   if(drawMode) {
     square.removeEventListener('mouseover', eraseEventCallback)
     square.addEventListener('mouseover', drawEventCallback)
   }
-  // Erase mode
   else {
     square.removeEventListener('mouseover', drawEventCallback)
     square.addEventListener('mouseover', eraseEventCallback)
