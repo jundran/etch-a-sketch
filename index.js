@@ -35,7 +35,6 @@ function handleClearButton() {
   document.querySelectorAll('.plain, .coloured').forEach(s => {
     clearColourAttributes(s)
   })
-  // Ensure sketch is in draw mode after clearing grid
   setDrawMode(true)
 }
 
